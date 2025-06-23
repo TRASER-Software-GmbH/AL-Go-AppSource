@@ -1,5 +1,36 @@
 {
-  "$schema": "https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v7.2/settings.schema.json",
+  "$schema": "https://raw.githubusercontent.com/TRASER-Software-GmbH/AL-Go-Actions/v7.2/settings.schema.json",
   "type": "AppSource App",
-  "templateUrl": "https://github.com/microsoft/AL-Go-AppSource@main"
+  "templateUrl": "https://github.com/TRASER-Software-GmbH/AL-Go-AppSource@main",
+  "CICDPushBranches": ["main", "staging", "release/*", "feature/*"],
+  "environments": ["Staging", "Production"],
+  "ConditionalSettings": [
+    {
+      "branches": ["staging"],
+      "settings": {
+        "appDependencyProbingPaths": [
+          {
+            "repo": "*",
+            "version": "latest",
+            "release_status": "latestBuild",
+            "branch": "staging",
+            "projects": "*",
+            "authTokenSecret": "ghTokenWorkflow"
+          }
+        ],
+        "versioningStrategy": 0,
+        "artifact": "////latest"
+      }
+    }
+  ],
+  "DeployToStaging": {
+    "branches": ["staging"],
+    "environmentName": "Staging",
+    "ContinuousDeployment": true
+  },
+  "DeployToProduction": {
+    "branches": ["main"],
+    "environmentName": "Production", 
+    "ContinuousDeployment": false
+  }
 }
