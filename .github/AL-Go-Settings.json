@@ -3,12 +3,23 @@
   "type": "AppSource App",
   "templateUrl": "https://github.com/TRASER-Software-GmbH/AL-Go-AppSource@main",
   "gitHubRunner": "[ self-hosted, windows ]",
-  "gitHubRunnerShell": "powershell",
-  "CICDPushBranches": ["main", "staging", "release/*", "feature/*"],
-  "environments": ["Staging", "Production"],
+  "runs-on": "[ self-hosted, windows ]",
+  "gitHubRunnerShell": "pwsh",
+  "CICDPushBranches": [
+    "main",
+    "staging",
+    "release/*",
+    "feature/*"
+  ],
+  "environments": [
+    "Staging",
+    "Production"
+  ],
   "ConditionalSettings": [
     {
-      "branches": ["staging"],
+      "branches": [
+        "staging"
+      ],
       "settings": {
         "appDependencyProbingPaths": [
           {
@@ -26,13 +37,92 @@
     }
   ],
   "DeployToStaging": {
-    "branches": ["staging"],
+    "branches": [
+      "staging"
+    ],
     "environmentName": "Staging",
     "ContinuousDeployment": true
   },
   "DeployToProduction": {
-    "branches": ["main"],
-    "environmentName": "Production", 
+    "branches": [
+      "main"
+    ],
+    "environmentName": "Production",
     "ContinuousDeployment": false
+  },
+  "nightlyBackup": {
+    "enabled": true,
+    "schedule": "0 2 * * *",
+    "storageLocation": "\\\\traser-storage\\bc-backups",
+    "retentionDays": 14,
+    "versions": [
+      {
+        "bcVersion": "24.0",
+        "containerName": "nightly-backup-v24",
+        "licenseFile": "licenseFileUrl",
+        "rapidStartLanguage": "DE"
+      },
+      {
+        "bcVersion": "23.0",
+        "containerName": "nightly-backup-v23",
+        "licenseFile": "licenseFileUrl",
+        "rapidStartLanguage": "DE"
+      }
+    ],
+    "apps": [
+      {
+        "name": "TRASER Core Application",
+        "publisher": "TRASER Software GmbH",
+        "source": "staging-artifacts"
+      }
+    ],
+    "testData": {
+      "includeRapidStart": true,
+      "customDataSets": [
+        "CustomerMaster",
+        "ItemMaster",
+        "VendorMaster"
+      ],
+      "language": "DE",
+      "currency": "EUR"
+    }
+  },
+  "nightlyTests": {
+    "enabled": true,
+    "schedule": "0 3 * * *",
+    "versions": [
+      {
+        "bcVersion": "24.0",
+        "containerName": "test-runner-v24",
+        "backupSource": "nightly-backup-v24",
+        "testSuites": [
+          "Unit",
+          "Integration",
+          "UI"
+        ]
+      },
+      {
+        "bcVersion": "23.0",
+        "containerName": "test-runner-v23",
+        "backupSource": "nightly-backup-v23",
+        "testSuites": [
+          "Unit",
+          "Integration"
+        ]
+      }
+    ],
+    "testApps": [
+      {
+        "name": "TRASER Core Tests",
+        "path": "test/TRASERCoreTests.app",
+        "type": "test"
+      }
+    ],
+    "reporting": {
+      "format": "JUnit",
+      "publishResults": true,
+      "failureThreshold": 95,
+      "emailNotification": true
+    }
   }
 }
